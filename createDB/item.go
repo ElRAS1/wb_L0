@@ -1,4 +1,4 @@
-package model
+package main
 
 type Item struct {
 	ChrtID      int    `json:"chrt_id" validate:"required"`

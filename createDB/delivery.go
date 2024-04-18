@@ -1,4 +1,4 @@
-package model
+package main
 
 type Delivery struct {
 	Name    string `json:"name" validate:"required"`
