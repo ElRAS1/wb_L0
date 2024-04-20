@@ -1,0 +1,5 @@
+addr = ":8080"
+loglevel = "debug"
+
+[store]
+dburl = "host=localhost dbname=wb_L0 sslmode=disable"

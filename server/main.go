@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 type application struct {
@@ -29,9 +31,24 @@ func main() {
 		ErrorLog: errorlog,
 		Handler:  app.routes(),
 	}
-
 	infolog.Printf("Starting server in %s", *addr)
 
-	err := srv.ListenAndServe()
-	errorlog.Fatal(err)
+	go func() {
+
+		sigint := make(chan os.Signal, 1)
+
+		signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
+		<-sigint
+
+		infolog.Println("Shutting down server...")
+
+		if err := srv.Shutdown(nil); err != nil {
+			errorlog.Fatalf("Server forced to shutdown: %v", err)
+		}
+
+	}()
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		errorlog.Fatalf("Server startup failed: %v", err)
+	}
 }

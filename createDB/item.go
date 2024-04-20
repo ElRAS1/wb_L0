@@ -1,15 +1,17 @@
 package main
 
 type Item struct {
-	ChrtID      int    `json:"chrt_id" validate:"required"`
-	TrackNumber string `json:"track_number" validate:"required"`
-	Price       int    `json:"price" validate:"required"`
-	Rid         string `json:"rid" validate:"required"`
-	Name        string `json:"name" validate:"required"`
-	Sale        int    `json:"sale" validate:"required"`
-	Size        string `json:"size" validate:"required"`
-	TotalPrice  int    `json:"total_price" validate:"required"`
-	NmID        int    `json:"nm_id" validate:"required"`
-	Brand       string `json:"brand" validate:"required"`
-	Status      int    `json:"status" validate:"required"`
+	ID          int    `db:"id" json:"item_id,omitempty"`
+	OrderID     string `db:"order_id" json:"order_id,omitempty"`
+	ChrtID      int    `db:"chrt_id" json:"chrt_id"`
+	TrackNumber string `db:"track_number" json:"track_number"`
+	Price       int    `db:"price" json:"price"`
+	Rid         string `db:"rid" json:"rid"`
+	Name        string `db:"item_name" json:"name"`
+	Sale        int    `db:"sale" json:"sale"`
+	Size        string `db:"item_size" json:"size"`
+	TotalPrice  int    `db:"total_price" json:"total_price"`
+	NmID        int    `db:"nm_id" json:"nm_id"`
+	Brand       string `db:"brand" json:"brand"`
+	Status      int    `db:"status" json:"status"`
 }

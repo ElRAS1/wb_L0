@@ -3,20 +3,19 @@ package main
 import "time"
 
 type Order struct {
-	OrderUID    string `json:"order_uid" validate:"required"`
-	TrackNumber string `json:"track_number" validate:"required"`
-	Entry       string `json:"entry" validate:"required"`
+	OrderUID          string    `db:"order_uid" json:"order_uid"`
+	TrackNumber       string    `db:"track_number" json:"track_number"`
+	Entry             string    `db:"entry" json:"entry"`
+	Locale            string    `db:"locale" json:"locale"`
+	InternalSignature string    `db:"internal_signature" json:"internal_signature"`
+	CustomerID        string    `db:"customer_id" json:"customer_id"`
+	DeliveryService   string    `db:"delivery_service" json:"delivery_service"`
+	ShardKey          string    `db:"shardkey" json:"shardkey"`
+	SmID              int       `db:"sm_id" json:"sm_id"`
+	DateCreated       time.Time `db:"date_created" json:"date_created"`
+	OofShard          string    `db:"oof_shard" json:"oof_shard"`
 
-	Delivery Delivery `json:"delivery" validate:"required"`
-	Payment  Payment  `json:"payment" validate:"required"`
-	Items    []Item   `json:"items" validate:"required"`
-
-	Locale            string    `json:"locale" validate:"required"`
-	InternalSignature string    `json:"internal_signature" validate:"min=0"`
-	CustomerID        string    `json:"customer_id" validate:"required"`
-	DeliveryService   string    `json:"delivery_service" validate:"required"`
-	Shardkey          string    `json:"shardkey" validate:"required"`
-	SmID              int       `json:"sm_id" validate:"required"`
-	DateCreated       time.Time `json:"date_created" validate:"required"`
-	OofShard          string    `json:"oof_shard" validate:"required"`
+	Delivery *Delivery `json:"delivery"`
+	Payment  *Payment  `json:"payment"`
+	Items    []Item    `json:"items"`
 }
