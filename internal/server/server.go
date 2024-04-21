@@ -37,8 +37,9 @@ func (s *APPServer) Start() error {
 	if err := s.configureStore(); err != nil {
 		return err
 	}
+	s.logger.Info("Connecting  Database...")
 
-	s.logger.Info("Starting server...")
+	s.logger.Info("Starting server... ports: ", s.config.Addr)
 	return http.ListenAndServe(s.config.Addr, s.router)
 }
 
@@ -62,7 +63,7 @@ func (s *APPServer) configureStore() error {
 	st := store.New(s.config.Store)
 
 	if err := st.Open(); err != nil {
-		return nil
+		return err
 	}
 
 	s.store = st
