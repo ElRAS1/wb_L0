@@ -1,7 +1,7 @@
 package store
 
 type Config struct {
-	DatabaseUrl string `toml: "dburl"`
+	DatabaseUrl string `toml:"dburl"`
 }
 
 func NewConfig() *Config {

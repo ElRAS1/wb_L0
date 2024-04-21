@@ -5,8 +5,8 @@ build :
 
 .PHONY: run
 run:
-	go run ./cmd/app
-
+	go run -v ./cmd/app 
+# -config-path configs/app.toml
 
 .PHONY: clear
 clear :

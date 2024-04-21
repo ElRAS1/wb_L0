@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+
 	_ "github.com/lib/pq"
 )
 
@@ -27,7 +28,6 @@ func (s *Store) Open() error {
 	if err := db.Ping(); err != nil {
 		return err
 	}
-
 	s.db = db
 
 	return nil
