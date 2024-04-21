@@ -25,7 +25,6 @@ func New(config *Config) *APPServer {
 	}
 }
 
-// Start server
 func (s *APPServer) Start() error {
 
 	if err := s.configureLogger(); err != nil {
@@ -38,6 +37,7 @@ func (s *APPServer) Start() error {
 		return err
 	}
 	defer s.store.Close()
+
 	s.logger.Info("Connecting  Database...")
 
 	s.logger.Info("Starting server... ports: ", s.config.Addr)

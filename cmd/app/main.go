@@ -17,10 +17,8 @@ func init() {
 func main() {
 	flag.Parse()
 
-
-
 	config := server.NewConfig()
-	
+
 	_, err := toml.DecodeFile(configPath, config)
 
 	if err != nil {
