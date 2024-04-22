@@ -1,7 +1,8 @@
 package server
 
 import (
-	"io"
+	"encoding/json"
+
 	"net/http"
 
 	"github.com/ElRAS1/wb_L0/store"
@@ -57,7 +58,7 @@ func (s *APPServer) configureLogger() error {
 }
 
 func (s *APPServer) configureRouter() {
-	s.router.HandleFunc("/hello", s.handleHello())
+	s.router.HandleFunc("/order/{id}", s.getOrder)
 }
 
 func (s *APPServer) configureStore() error {
@@ -72,8 +73,26 @@ func (s *APPServer) configureStore() error {
 	return nil
 }
 
-func (s *APPServer) handleHello() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello")
+func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	// fmt.Printf("%v\n", r)
+	// fmt.Println("id =", id)
+	// fmt.Println(s.store.Cache)
+	if res, ok := s.store.Cache[id]; ok {
+		js, err := json.Marshal(res)
+		if err != nil {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		s.logger.Info("Returning the response to the GET request")
+		w.Write([]byte(js))
+	} else {
+		s.logger.Error("no data available")
+		http.Error(w, "data not found", http.StatusNotFound)
 	}
+
 }

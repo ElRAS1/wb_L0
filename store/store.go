@@ -13,11 +13,13 @@ import (
 type Store struct {
 	config *Config
 	db     *sqlx.DB
+	Cache  map[string]Order
 }
 
 func New(config *Config) *Store {
 	return &Store{
 		config: config,
+		Cache:  make(map[string]Order),
 	}
 }
 
@@ -91,6 +93,12 @@ func (s *Store) insertOrder(db *sqlx.DB, order Order) error {
 			return err
 		}
 	}
+
+	s.Cache[order.OrderUID] = order
+
+	// fmt.Println(s.Cache)
+
+	// fmt.Printf("%v %T\n", order.OrderUID, s.Cache[order.OrderUID])
 
 	return nil
 }

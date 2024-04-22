@@ -7,14 +7,20 @@ TARGET = app
 
 all: build
 
+rebstorage: remegrate migrate
+
+migrate:
+	migrate -path migrations -database "postgres://elmir:1902@localhost/wb_L0?sslmode=disable" up
+
+remegrate:
+	migrate -path migrations -database "postgres://elmir:1902@localhost/wb_L0?sslmode=disable" down
+
 
 build:
-	format
 	$(GO) build $(GOFLAGS) -o $(TARGET) ./cmd/app
 
 
 run: 
-	format
 	$(GO) run $(GOFLAGS) ./cmd/app
 
 
@@ -27,4 +33,4 @@ format:
 	find . -name "*.go" -exec go fmt {} \;
 
 # Фактические цели
-.PHONY: all build run clear format rebuild
+.PHONY: all build run clear format rebuild migrate remegrate rebstorage
