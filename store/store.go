@@ -1,35 +1,30 @@
 package store
 
 import (
-	// "database/sql"
 	"encoding/json"
 	"log"
 	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/nats-io/stan.go"
 )
 
 type Store struct {
 	config *Config
 	db     *sqlx.DB
-	Cache  map[string]Order
+	Cache  map[string]interface{}
 }
 
 func New(config *Config) *Store {
 	return &Store{
 		config: config,
-		Cache:  make(map[string]Order),
+		Cache:  make(map[string]interface{}),
 	}
 }
 
 func (s *Store) Open() error {
 	db, err := sqlx.Connect("postgres", s.config.DatabaseUrl)
-	if err != nil {
-		return err
-	}
-
-	err = s.jsonData(db)
 	if err != nil {
 		return err
 	}
@@ -42,25 +37,60 @@ func (s *Store) Open() error {
 	return nil
 }
 
-func (s *Store) jsonData(db *sqlx.DB) error {
+func (s *Store) NatsSubscribe(ns stan.Conn) {
+
+	ns.Subscribe("wb", func(msg *stan.Msg) {
+		data := Order{}
+		err := json.Unmarshal(msg.Data, &data)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		err = s.insertOrder(s.db, data)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+	}, stan.DurableName("wb"))
+
+}
+
+func (s *Store) NatsPublish(ns stan.Conn) error {
+	data, err := s.jsonData()
+
+	if err != nil {
+		return err
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("Error serializing Order to JSON: %v", err)
+	}
+
+	err = ns.Publish("wb", []byte(jsonData))
+	if err != nil {
+		log.Fatalf("Error while trying to send msg: %v", err)
+	}
+
+	return nil
+}
+
+func (s *Store) jsonData() (*Order, error) {
 	var order Order
 	file, err := os.ReadFile("model.json")
 	if err != nil {
-		return err
+		log.Fatalln(err)
 	}
 
 	err = json.Unmarshal(file, &order)
 	if err != nil {
 		log.Fatalf("Error parsing JSON: %v", err)
 	}
-
-	// Передача order в insertOrder
-	err = s.insertOrder(db, order)
 	if err != nil {
-		return err
+		log.Fatalln(err)
 	}
 
-	return nil
+	return &order, nil
 }
 
 func (s *Store) insertOrder(db *sqlx.DB, order Order) error {
@@ -95,10 +125,6 @@ func (s *Store) insertOrder(db *sqlx.DB, order Order) error {
 	}
 
 	s.Cache[order.OrderUID] = order
-
-	// fmt.Println(s.Cache)
-
-	// fmt.Printf("%v %T\n", order.OrderUID, s.Cache[order.OrderUID])
 
 	return nil
 }

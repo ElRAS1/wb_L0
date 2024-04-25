@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/ElRAS1/wb_L0/store"
+
 	"github.com/gorilla/mux"
+	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
 )
 
@@ -33,13 +35,18 @@ func (s *APPServer) Start() error {
 	}
 
 	s.configureRouter()
-
 	if err := s.configureStore(); err != nil {
 		return err
 	}
 	defer s.store.Close()
 
 	s.logger.Info("Connecting  Database...")
+
+	if err := s.configureNats(); err != nil {
+		s.logger.Error("Failed connection on nats...")
+		return err
+	}
+	s.logger.Info("Connecting  nats-streaming...")
 
 	s.logger.Info("Starting server... ports: ", s.config.Addr)
 	return http.ListenAndServe(s.config.Addr, s.router)
@@ -73,15 +80,25 @@ func (s *APPServer) configureStore() error {
 	return nil
 }
 
+func (s *APPServer) configureNats() error {
+	ns, err := stan.Connect("test-cluster", "test-cluster")
+
+	if err != nil {
+		return err
+	}
+	defer ns.Close()
+
+	s.store.NatsSubscribe(ns)
+
+	s.store.NatsPublish(ns)
+	return nil
+}
+
 func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-
-	// fmt.Printf("%v\n", r)
-	// fmt.Println("id =", id)
-	// fmt.Println(s.store.Cache)
 	if res, ok := s.store.Cache[id]; ok {
-		js, err := json.Marshal(res)
+		js, err := json.MarshalIndent(res, "", " ")
 		if err != nil {
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
