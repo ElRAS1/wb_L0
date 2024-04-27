@@ -5,8 +5,8 @@ import (
 )
 
 type Config struct {
-	Addr     string `yaml:"addr"`
-	LogLevel string `yaml:"loglevel"`
+	Addr     string `toml:"addr"`
+	LogLevel string `toml:"loglevel"`
 	Store    *store.Config
 }
 

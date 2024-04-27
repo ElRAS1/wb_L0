@@ -32,7 +32,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	initConfig(config)
+	err = initConfig(config)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	s := server.New(config)
 

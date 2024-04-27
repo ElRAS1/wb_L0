@@ -2,6 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"net/http"
 
@@ -49,6 +52,14 @@ func (s *APPServer) Start() error {
 	s.logger.Info("Connecting  nats-streaming...")
 
 	s.logger.Info("Starting server... ports: ", s.config.Addr)
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		s.logger.Info("Received shutdown signal")
+		os.Exit(0)
+	}()
 	return http.ListenAndServe(s.config.Addr, s.router)
 }
 
@@ -90,7 +101,11 @@ func (s *APPServer) configureNats() error {
 
 	s.store.NatsSubscribe(ns)
 
-	s.store.NatsPublish(ns)
+	err = s.store.NatsPublish(ns)
+
+	if err != nil {
+		s.logger.Error("Error publich data of nats streaming...")
+	}
 	return nil
 }
 
@@ -106,7 +121,10 @@ func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		s.logger.Info("Returning the response to the GET request")
-		w.Write([]byte(js))
+		_, err = w.Write([]byte(js))
+		if err != nil {
+			http.Error(w, "data could not be published", http.StatusUnprocessableEntity)
+		}
 	} else {
 		s.logger.Error("no data available")
 		http.Error(w, "data not found", http.StatusNotFound)

@@ -40,8 +40,7 @@ func (s *Store) Open() error {
 }
 
 func (s *Store) NatsSubscribe(ns stan.Conn) {
-
-	ns.Subscribe("wb", func(msg *stan.Msg) {
+	_, err := ns.Subscribe("wb", func(msg *stan.Msg) {
 		data := Order{}
 		err := json.Unmarshal(msg.Data, &data)
 
@@ -53,9 +52,11 @@ func (s *Store) NatsSubscribe(ns stan.Conn) {
 			log.Println(err)
 			return
 		}
-
 	}, stan.DurableName("wb"))
 
+	if err != nil {
+		log.Fatalln("Failed to subscribe:", err)
+	}
 }
 
 func (s *Store) NatsPublish(ns stan.Conn) error {
