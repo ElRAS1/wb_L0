@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -24,7 +25,8 @@ func New(config *Config) *Store {
 }
 
 func (s *Store) Open() error {
-	db, err := sqlx.Connect("postgres", s.config.DatabaseUrl)
+	DatabaseUrl := fmt.Sprintf("host=%v dbname=%v user=%v password=%v sslmode=disable", s.config.DBHost, s.config.DBName, s.config.DBUser, s.config.DBPassword)
+	db, err := sqlx.Connect("postgres", DatabaseUrl)
 	if err != nil {
 		return err
 	}
