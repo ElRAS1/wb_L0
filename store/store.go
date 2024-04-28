@@ -1,6 +1,7 @@
 package store
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -47,7 +48,6 @@ func (s *Store) NatsSubscribe(ns stan.Conn) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		// err = s.insertOrder(s.db, data)
 		if err != nil {
 			log.Println(err)
 			return
@@ -69,15 +69,44 @@ func (s *Store) NatsPublish(ns stan.Conn) {
 	if err != nil {
 		log.Fatalf("Error serializing Order to JSON: %v", err)
 	}
-	err = s.insertOrder(s.db, *data)
-	if err != nil {
-		log.Fatalln(err)
+
+	ok := s.checkData(data)
+
+	if ok {
+		return
 	}
+
 	err = ns.Publish("wb", []byte(jsonData))
 	if err != nil {
 		log.Fatalf("Error while trying to send msg: %v", err)
 	}
 
+}
+
+func (s *Store) checkData(data *Order) bool {
+	if _, ok := s.Cache[data.OrderUID]; ok {
+		return true
+	}
+
+	var order Order
+	query := `SELECT * FROM orders WHERE order_uid = $1;`
+	err := s.db.QueryRowx(query, data.OrderUID).StructScan(&order)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = s.insertOrder(s.db, *data)
+
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return false
+		}
+		log.Fatalln(err)
+
+	}
+
+	s.Cache[data.OrderUID] = order
+	return true
 }
 
 func (s *Store) jsonData() (*Order, error) {
@@ -88,8 +117,6 @@ func (s *Store) jsonData() (*Order, error) {
 	}
 
 	err = json.Unmarshal(file, &order)
-
-	// fmt.Println(order)
 
 	if err != nil {
 		log.Fatalf("Error parsing JSON: %v", err)

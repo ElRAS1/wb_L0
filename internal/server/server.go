@@ -2,7 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	// "fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,6 +33,10 @@ func New(config *Config) *APPServer {
 }
 
 func (s *APPServer) Start() error {
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	if err := s.configureLogger(); err != nil {
 		return err
