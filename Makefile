@@ -9,10 +9,10 @@ all: build
 
 
 migrate:
-	migrate -path migrations -database "postgres://elmir:1902@localhost/wb_L0?sslmode=disable" up
+	migrate -path migrations -database "postgres://wb:wb@localhost/wb?sslmode=disable" up
 
 remegrate:
-	migrate -path migrations -database "postgres://elmir:1902@localhost/wb_L0?sslmode=disable" down
+	migrate -path migrations -database "postgres://wb:wb@localhost/wb?sslmode=disable" down
 
 rebstorage: remegrate migrate
 
@@ -47,5 +47,10 @@ lint:
 	golangci-lint run
 
 
+wrk:
+	cd wrk/ 
+	wrk -t12 -c1000 -d10s -s wrk/my_script.lua http://localhost:8080/order/b563feb7b2b84b6test
+
+
 # Фактические цели
-.PHONY: all build run clear format rebuild migrate remegrate rebstorage lint
+.PHONY: all build run clear format rebuild migrate remegrate rebstorage lint wrk

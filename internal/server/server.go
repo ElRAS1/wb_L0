@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	// "fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -92,7 +93,7 @@ func (s *APPServer) configureStore() error {
 }
 
 func (s *APPServer) configureNats() error {
-	ns, err := stan.Connect("test-cluster", "test-cluster")
+	ns, err := stan.Connect("test-cluster", "test-cluster", stan.NatsURL("localhost:4222"))
 
 	if err != nil {
 		return err
@@ -101,11 +102,11 @@ func (s *APPServer) configureNats() error {
 
 	s.store.NatsSubscribe(ns)
 
-	err = s.store.NatsPublish(ns)
+	s.store.NatsPublish(ns)
 
-	if err != nil {
-		s.logger.Error("Error publich data of nats streaming...")
-	}
+	// if err != nil {
+	// 	s.logger.Error("Error publich data of nats streaming...")
+	// }
 	return nil
 }
 

@@ -1,0 +1,76 @@
+# services:
+#   postgres:
+#     image: postgres:15-alpine
+#     environment:
+#       POSTGRES_PASSWORD: "wb"
+#       POSTGRES_USER: "wb"
+#       POSTGRES_DB: "wb"
+#     volumes:
+#       - postgres:/var/lib/postgresql/data
+
+#     ports:
+#       - 5433:5432
+
+#   nats:
+#     image: nats-streaming
+#     command: -js -sd /data
+#     volumes:
+#       - nats:/data
+#     ports:
+#       - 4222:4222
+
+# volumes:
+#   postgres:
+#   nats:
+
+
+
+version: '3.8'
+
+services:
+ postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: "wb"
+      POSTGRES_USER: "wb"
+      POSTGRES_DB: "wb"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - mynetwork
+
+ nats:
+    image: nats-streaming
+    command: -js -sd /data
+    volumes:
+      - nats:/data
+    ports:
+      - 4222:4222
+    networks:
+      - mynetwork
+ migrations:
+    image: migrate/migrate
+    command:
+      - -path=/migrations
+      - -database=postgres://wb:wb@postgres:5432/wb?sslmode=disable
+      - up
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - postgres
+    networks:
+      - mynetwork
+    entrypoint: ["/bin/sh", "/migrations/entrypoint.sh"]
+
+
+volumes:
+ postgres:
+ nats:
+
+networks:
+ mynetwork:
+    driver: bridge
+
+
