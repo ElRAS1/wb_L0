@@ -2,7 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	"log"
+	// "log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -34,9 +34,9 @@ func New(config *Config) *APPServer {
 
 func (s *APPServer) Start() error {
 
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:6060", nil))
+	// }()
 
 	if err := s.configureLogger(); err != nil {
 		return err
@@ -108,9 +108,6 @@ func (s *APPServer) configureNats() error {
 
 	s.store.NatsPublish(ns)
 
-	// if err != nil {
-	// 	s.logger.Error("Error publich data of nats streaming...")
-	// }
 	return nil
 }
 
