@@ -8,18 +8,19 @@ import (
 )
 
 func (s *Store) NatsSubscribe(ns stan.Conn) {
-	_, err := ns.Subscribe("wb", func(msg *stan.Msg) {
+	_, err := ns.Subscribe("order", func(msg *stan.Msg) {
 		data := Order{}
 		err := json.Unmarshal(msg.Data, &data)
 
 		if err != nil {
+			log.Println("ya tut")
 			log.Fatalln(err)
 		}
 		if err != nil {
 			log.Println(err)
 			return
 		}
-	}, stan.DurableName("wb"))
+	}, stan.DurableName("order"))
 
 	if err != nil {
 		log.Fatalln("Failed to subscribe:", err)
@@ -30,6 +31,7 @@ func (s *Store) NatsPublish(ns stan.Conn) {
 	data, err := s.jsonData()
 
 	if err != nil {
+		log.Println("ya tut1")
 		log.Fatalln(err)
 	}
 	jsonData, err := json.Marshal(data)
@@ -43,7 +45,7 @@ func (s *Store) NatsPublish(ns stan.Conn) {
 		return
 	}
 
-	err = ns.Publish("wb", []byte(jsonData))
+	err = ns.Publish("order", []byte(jsonData))
 	if err != nil {
 		log.Fatalf("Error while trying to send msg: %v", err)
 	}

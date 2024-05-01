@@ -10,7 +10,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/stan.go v0.10.4
 	github.com/sirupsen/logrus v1.9.3
-	
+
 )
 
 require (

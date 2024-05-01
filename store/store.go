@@ -1,6 +1,7 @@
 package store
 
 import (
+	// "fmt"
 	"fmt"
 	"sync"
 
@@ -23,7 +24,7 @@ func New(config *Config) *Store {
 }
 
 func (s *Store) Open() error {
-	DatabaseUrl := fmt.Sprintf("host=%v dbname=%v user=%v password=%v sslmode=disable", s.config.DBHost, s.config.DBName, s.config.DBUser, s.config.DBPassword)
+	DatabaseUrl := fmt.Sprintf("postgresql=%v dbname=%v user=%v password=%v sslmode=disable", s.config.DBHost, s.config.DBName, s.config.DBUser, s.config.DBPassword)
 	db, err := sqlx.Connect("postgres", DatabaseUrl)
 	if err != nil {
 		return err

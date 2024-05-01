@@ -11,9 +11,26 @@ RUN go mod download
 
 
 
-COPY cmd/ ./
-RUN ls
-RUN go build -o ./bin/app ./app/main.go
+COPY  . /app
+RUN make build
+
+
+FROM alpine
+
+
+COPY --from=builder /app /
+COPY configs/app.toml /app.toml
+COPY  .env /.env
+# RUN ls -a
+CMD ["./app"]
+
+
+
+
+
+
+
+
 
 
 

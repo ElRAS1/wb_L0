@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
-	server "github.com/ElRAS1/wb_L0/internal/server"
+	"github.com/ElRAS1/wb_L0/internal/server"
 	"github.com/joho/godotenv"
 )
 

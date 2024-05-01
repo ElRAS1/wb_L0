@@ -97,13 +97,13 @@ func (s *APPServer) configureStore() error {
 }
 
 func (s *APPServer) configureNats() error {
-	ns, err := stan.Connect("test-cluster", "test-cluster", stan.NatsURL("localhost:4222"))
+	ns, err := stan.Connect("test-cluster", "order", stan.NatsURL("nats:4222"))
 
 	if err != nil {
 		return err
 	}
-	defer ns.Close()
 
+	defer ns.Close()
 	s.store.NatsSubscribe(ns)
 
 	s.store.NatsPublish(ns)

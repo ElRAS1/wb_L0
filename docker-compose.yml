@@ -1,100 +1,52 @@
-# version: '3.8'
-
-# services:
-#  postgres:
-#     image: postgres:15-alpine
-#     environment:
-#       POSTGRES_PASSWORD: "wb"
-#       POSTGRES_USER: "wb"
-#       POSTGRES_DB: "wb"
-#     volumes:
-#       - postgres:/var/lib/postgresql/data
-#     ports:
-#       - 5432:5432
-#     networks:
-#       - mynetwork
-
-      
-
-#  nats:
-#     image: nats-streaming
-#     command: -js -sd /data
-#     volumes:
-#       - nats:/data
-#     ports:
-#       - 4222:4222
-#     networks:
-#       - mynetwork
-
-
-
-#  migrations:
-#     image: migrate/migrate
-#     command:
-#       - -path=/migrations
-#       - -database=postgres://wb:wb@postgres:5432/wb?sslmode=disable
-#       - up
-#     volumes:
-#       - ./migrations:/migrations
-#     depends_on:
-#       - postgres
-#     networks:
-#       - mynetwork
-#     entrypoint: ["/bin/sh", "/migrations/entrypoint.sh"]
-
-
-# volumes:
-#  postgres:
-#  nats:
-
-# networks:
-#  mynetwork:
-#     driver: bridge
-
-
-
 version: '3.8'
 
 services:
- postgres:
+  postgres:
     image: postgres:15-alpine
-    environment:
-      POSTGRES_PASSWORD: "wb"
-      POSTGRES_USER: "wb"
-      POSTGRES_DB: "wb"
     volumes:
       - postgres:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - 5432:5432
-    networks:
-      - mynetwork
 
- nats:
+    restart: unless-stopped
+
+  nats:
     image: nats-streaming
     command: -js -sd /data
+    depends_on:
+      - postgres
     volumes:
       - nats:/data
     ports:
       - 4222:4222
-    networks:
-      - mynetwork
 
- myapp: # Имя сервиса для вашего приложения на Go
-    build: . # Путь к директории с Dockerfile
+  migrations:
+    image: migrate/migrate
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - nats
+      - postgres
+    entrypoint: [ "/bin/sh", "/migrations/entrypoint.sh" ]
+
+  myapp:
+    build: .
     depends_on:
       - postgres
       - nats
-    networks:
-      - mynetwork
-    environment:
-      - DATABASE_URL=postgres://wb:wb@postgres:5432/wb?sslmode=disable
-      # Добавьте здесь любые другие переменные окружения, необходимые для вашего приложения
+      - migrations
+    ports:
+      - 8080:8080
 
 volumes:
- postgres:
- nats:
+  postgres:
+  migrations:
+  nats:
 
-networks:
- mynetwork:
-    driver: bridge
 
