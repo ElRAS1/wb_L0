@@ -13,7 +13,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - 5432:5432
-
     restart: unless-stopped
 
   nats:
@@ -48,5 +47,4 @@ volumes:
   postgres:
   migrations:
   nats:
-
 
