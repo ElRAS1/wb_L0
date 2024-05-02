@@ -8,21 +8,8 @@ TARGET = app
 all: build
 
 
-migrate:
-	migrate -path migrations -database "postgres://wb:wb@localhost/wb?sslmode=disable" up
-
-remegrate:
-	migrate -path migrations -database "postgres://wb:wb@localhost/wb?sslmode=disable" down
-
-rebstorage: remegrate migrate
-
-
-
-
-
 build:
 	$(GO) build $(GOFLAGS) -o $(TARGET) ./cmd/app
-
 
 run: 
 	$(GO) run $(GOFLAGS) ./cmd/app
@@ -53,4 +40,4 @@ wrk:
 
 
 # Фактические цели
-.PHONY: all build run clear format rebuild migrate remegrate rebstorage lint wrk
+.PHONY: all build run clear format rebuild lint wrk

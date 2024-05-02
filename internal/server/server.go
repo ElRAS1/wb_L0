@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	// "log"
 	"os"
 	"os/signal"
 	"syscall"

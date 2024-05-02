@@ -3,10 +3,11 @@ package store
 import "time"
 
 type Config struct {
-	DBHost     string `toml:"db_host"`
-	DBUser     string `toml:"db_user"`
-	DBPassword string `toml:"db_password"`
-	DBName     string `toml:"db_name"`
+	DBHost     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBPort     string
 }
 
 func NewConfig() *Config {
