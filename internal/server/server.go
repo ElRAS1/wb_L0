@@ -2,11 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"net/http"
 
 	"github.com/ElRAS1/wb_L0/store"
 
@@ -20,6 +19,7 @@ type APPServer struct {
 	logger *logrus.Logger
 	router *mux.Router
 	store  *store.Store
+	server *http.Server
 }
 
 // Create config
@@ -32,7 +32,6 @@ func New(config *Config) *APPServer {
 }
 
 func (s *APPServer) Start() error {
-
 	if err := s.configureLogger(); err != nil {
 		return err
 	}
@@ -53,19 +52,24 @@ func (s *APPServer) Start() error {
 
 	s.logger.Info("Starting server... ports: ", s.config.Addr)
 
+	s.server = &http.Server{
+		Addr:    s.config.Addr,
+		Handler: s.router,
+	}
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sigs
 		s.logger.Info("Received shutdown signal")
-		os.Exit(0)
+		s.server.Close()
 	}()
+
 	return http.ListenAndServe(s.config.Addr, s.router)
 }
 
 func (s *APPServer) configureLogger() error {
 	level, err := logrus.ParseLevel(s.config.LogLevel)
-
 	if err != nil {
 		return err
 	}
@@ -106,25 +110,52 @@ func (s *APPServer) configureNats() error {
 	return nil
 }
 
+// func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	id := vars["id"]
+// 	if res, ok := s.store.Cache[id]; ok {
+// 		js, err := json.MarshalIndent(res, "", " ")
+// 		if err != nil {
+// 			http.Error(w, "internal server error", http.StatusInternalServerError)
+// 			return
+// 		}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.WriteHeader(http.StatusOK)
+// 		s.logger.Info("Returning the response to the GET request")
+// 		_, err = w.Write([]byte(js))
+// 		if err != nil {
+// 			http.Error(w, "data could not be published", http.StatusUnprocessableEntity)
+// 		}
+// 	} else {
+// 		s.logger.Error("no data available")
+// 		http.Error(w, "data not found", http.StatusNotFound)
+// 	}
+
+// }
+
 func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
 	id := vars["id"]
-	if res, ok := s.store.Cache[id]; ok {
-		js, err := json.MarshalIndent(res, "", " ")
-		if err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		s.logger.Info("Returning the response to the GET request")
-		_, err = w.Write([]byte(js))
-		if err != nil {
-			http.Error(w, "data could not be published", http.StatusUnprocessableEntity)
-		}
-	} else {
+	res, ok := s.store.Cache[id]
+	if !ok {
 		s.logger.Error("no data available")
 		http.Error(w, "data not found", http.StatusNotFound)
+		return
+	}
+
+	js, err := json.MarshalIndent(res, "", " ")
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	s.logger.Info("Returning the response to the GET request")
+	_, err = w.Write([]byte(js))
+	if err != nil {
+		http.Error(w, "data could not be published", http.StatusUnprocessableEntity)
 	}
 
 }

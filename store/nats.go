@@ -13,7 +13,6 @@ func (s *Store) NatsSubscribe(ns stan.Conn) {
 		err := json.Unmarshal(msg.Data, &data)
 
 		if err != nil {
-			log.Println("ya tut")
 			log.Fatalln(err)
 		}
 		if err != nil {
@@ -31,7 +30,6 @@ func (s *Store) NatsPublish(ns stan.Conn) {
 	data, err := s.jsonData()
 
 	if err != nil {
-		log.Println("ya tut1")
 		log.Fatalln(err)
 	}
 	jsonData, err := json.Marshal(data)
