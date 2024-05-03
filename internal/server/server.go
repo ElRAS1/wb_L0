@@ -110,29 +110,6 @@ func (s *APPServer) configureNats() error {
 	return nil
 }
 
-// func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	id := vars["id"]
-// 	if res, ok := s.store.Cache[id]; ok {
-// 		js, err := json.MarshalIndent(res, "", " ")
-// 		if err != nil {
-// 			http.Error(w, "internal server error", http.StatusInternalServerError)
-// 			return
-// 		}
-// 		w.Header().Set("Content-Type", "application/json")
-// 		w.WriteHeader(http.StatusOK)
-// 		s.logger.Info("Returning the response to the GET request")
-// 		_, err = w.Write([]byte(js))
-// 		if err != nil {
-// 			http.Error(w, "data could not be published", http.StatusUnprocessableEntity)
-// 		}
-// 	} else {
-// 		s.logger.Error("no data available")
-// 		http.Error(w, "data not found", http.StatusNotFound)
-// 	}
-
-// }
-
 func (s *APPServer) getOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
