@@ -63,6 +63,8 @@ func (s *APPServer) Start() error {
 		<-sigs
 		s.logger.Info("Received shutdown signal")
 		s.server.Close()
+		s.store.Close()
+		os.Exit(0)
 	}()
 
 	return http.ListenAndServe(s.config.Addr, s.router)
